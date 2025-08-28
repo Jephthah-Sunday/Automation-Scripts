@@ -1,0 +1,54 @@
+import http from 'k6/http';
+import { check } from 'k6';
+import { formLoadTime } from '../utils/metrics.js';
+
+const BASE_URL = 'https://dev.duchenneukconnect.org';
+const AUTH_TOKEN_LOAD = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBMzBicldXblY0T0Y2eFJpVkFZSTBmQW1xRmtJaWUyanBZODdxR1ZUQzRjIn0.eyJleHAiOjE3NTM0NDUxNTcsImlhdCI6MTc1MzQ0NDI1NywianRpIjoib25ydHJvOjgyNjczOWY5LTMwNDMtYTdlYi03NzE0LTU3NDVlM2Y3ZWIxYyIsImlzcyI6Imh0dHBzOi8vZGV2LmR1Y2hlbm5ldWtjb25uZWN0Lm9yZy9rZXljbG9hay9yZWFsbXMvZHVjaGVubmUtdWsiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMDlmNzA0N2EtYzIxMy00NmUyLTk2ZjItZWNhMDg4YzllNTA1IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZHVjaGVubmUtdWstY2xpZW50Iiwic2lkIjoiOTRkN2E3NzctZGIyYy00YTVjLWFlMDgtYWFiZjczYzQzYzVlIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwczovL2Rldi5kdWNoZW5uZXVrY29ubmVjdC5vcmciLCJodHRwczovL2Vjcy1hcHAtYWxiLWRldmVsb3AtMTQ0OTg3NTYwNS5ldS13ZXN0LTIuZWxiLmFtYXpvbmF3cy5jb20iLCIqIiwiaHR0cDovL2xvY2FsaG9zdDozMDAwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJjYXJlZ2l2ZXIiLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiZGVmYXVsdC1yb2xlcy1kdWNoZW5uZS11ayJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGRlc2NlbmRhbnRzIGNvbnNlbnQtb3B0aW9ucyBlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImRlc2NlbmRhbnRzX2lkcyI6WyJlOTBjYmViNS1hMzJhLTQ0OTktYTY5Ny04MzE5NzY0ZTlhMDQiLCI0NGQwNjNkMi1jYzg1LTRkNWItOTdiNS1kOGQ0ZjFiMGVmMjUiLCI2ZTQ5NzMxZi1lMmZiLTQ3YmYtYWEyZi0zZWUwNDZiNDY0YjUiXSwibmFtZSI6Ikx5ZGlhIENhbXBiZWxsIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYmlyYWphQHlvcG1haWwuY29tIiwiZ2l2ZW5fbmFtZSI6Ikx5ZGlhIiwiZmFtaWx5X25hbWUiOiJDYW1wYmVsbCIsImVtYWlsIjoiYmlyYWphQHlvcG1haWwuY29tIiwiY29uc2VudE9wdGlvbklkcyI6WyIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTUiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTIiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTMiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTEiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTQiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZTIiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZTEiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZjIiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZjEiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYzUiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYzYiXX0.FA8Fru-IrZx_-Bn1iuk14UiJQpn9ZrNh0n1L6jKNTHtxyF-Cav8Keq9o2FSH-dE0NpTt3W2W0SeMwkaaleMjRtCqCWIoJ50Vu52amWy8ljOi8RE8HIsurEKkgXigQ5uChqx31BdItAqiwha8STvXpa7xKYbNOsPaPthGQo-JkOfVe3wFSUNtlxt0hLtw1ed3SYeaayuWbffmbe0LafO0rIh2tul_OQ5ql7imZhN5yDZWyXtIozXTBIB0Wtok_L7dkzhQWzUIoJ0j8M06BtonSPbX_UagrgZZK8hdgeZt9S31oS6eiruoQefM2xfjDFZkvCgs5pmVSC6Wap34r2RJaQ";
+const AUTH_TOKEN_SUBMIT = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBMzBicldXblY0T0Y2eFJpVkFZSTBmQW1xRmtJaWUyanBZODdxR1ZUQzRjIn0.eyJleHAiOjE3NTM0NDM4OTIsImlhdCI6MTc1MzQ0Mjk5MiwianRpIjoib25ydHJvOmUzNmEzZDdhLTg2NjAtMDI3NC1iM2Q3LWIyMTE5ZjcxOTNhNSIsImlzcyI6Imh0dHBzOi8vZGV2LmR1Y2hlbm5ldWtjb25uZWN0Lm9yZy9rZXljbG9hay9yZWFsbXMvZHVjaGVubmUtdWsiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMDlmNzA0N2EtYzIxMy00NmUyLTk2ZjItZWNhMDg4YzllNTA1IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZHVjaGVubmUtdWstY2xpZW50Iiwic2lkIjoiZjIyNDJhYmQtYjgyMy00MzMyLWExNDgtNWQ1NTM3YzUyOTdiIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwczovL2Rldi5kdWNoZW5uZXVrY29ubmVjdC5vcmciLCJodHRwczovL2Vjcy1hcHAtYWxiLWRldmVsb3AtMTQ0OTg3NTYwNS5ldS13ZXN0LTIuZWxiLmFtYXpvbmF3cy5jb20iLCIqIiwiaHR0cDovL2xvY2FsaG9zdDozMDAwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJjYXJlZ2l2ZXIiLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiZGVmYXVsdC1yb2xlcy1kdWNoZW5uZS11ayJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGRlc2NlbmRhbnRzIGNvbnNlbnQtb3B0aW9ucyBlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImRlc2NlbmRhbnRzX2lkcyI6WyJlOTBjYmViNS1hMzJhLTQ0OTktYTY5Ny04MzE5NzY0ZTlhMDQiLCI0NGQwNjNkMi1jYzg1LTRkNWItOTdiNS1kOGQ0ZjFiMGVmMjUiLCI2ZTQ5NzMxZi1lMmZiLTQ3YmYtYWEyZi0zZWUwNDZiNDY0YjUiXSwibmFtZSI6Ikx5ZGlhIENhbXBiZWxsIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYmlyYWphQHlvcG1haWwuY29tIiwiZ2l2ZW5fbmFtZSI6Ikx5ZGlhIiwiZmFtaWx5X25hbWUiOiJDYW1wYmVsbCIsImVtYWlsIjoiYmlyYWphQHlvcG1haWwuY29tIiwiY29uc2VudE9wdGlvbklkcyI6WyIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTUiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTIiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTMiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTEiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTQiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZTIiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZTEiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZjIiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmZjEiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYzUiLCIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYzYiXX0.PPAyapZfLkJKgWs4ptqZOPHfjPeDMrOR_wiSYAPuBiCLRwGLR1TOO2w6jbDMaCFH9_bTgnQJ24Rjw5tXQHe58mBwyI9T8v4T5gdLJsiiFE1TaOwNT3IclDh2dhusHKvk08qx6DJXWZbTjM29EePR4IEMyh0i190N-Za_DN4sE8p4IvcASuM99MHUjBhW1VOaerSgFTlJ3WnWhhC_WfYjpzwZeAoPmSn2TBQxBQTnmrvp_b2g1tHu1hVIl1V84IXKlmELV-VLALBWr5Otl-B5XHdOEdPH8ekN7tTe8u3zJAt2qSt6PyNjaOO4LACtXc39_jcNDp6QCu6m9tUK8y_D4g";
+const PATIENT_ID = 'e90cbeb5-a32a-4499-a697-8319764e9a04';
+
+export function loadRegistryForm() {
+  const res = http.get(`${BASE_URL}/api/Questionnaire/9c32d418-11aa-4ccf-b55a-c234de8bde0b`,{ 
+    headers: {
+      // Authorization: `Bearer ${AUTH_TOKEN_LOAD}`,
+      // 'X-Selected-Patient-Id': PATIENT_ID,
+      // 'Content-Type': 'application/json'
+    }
+   });
+  formLoadTime.add(res.timings.duration);
+  check(res, {
+    'Form loads successfully': (r) => r.status === 200,
+    'Form load < 2.5s': (r) => r.timings.duration < 2500,
+  });
+  if (res.status !== 200) {
+  console.log(`❌ Failed with status: ${res.status}`);
+  console.log(`Response body: ${res.body}`);
+  }
+}
+
+export function submitForm() {
+  const res = http.post(`${BASE_URL}/api/questionnaire-responses`, {
+    Body: {
+  "questionnaireId":"1dc1e4df-a0b1-4e42-a89b-b25f90afac91",
+  "answers": [
+    {
+      "questionId": "q1",
+      "value": "Jeph",
+      "type": "text",
+      "isConditional": false
+    }
+  ],
+  "submittedAt": "2024-01-15T10:30:00Z"
+}}, { 
+  headers: {
+      Authorization: `Bearer ${AUTH_TOKEN_SUBMIT}`,
+      'X-Selected-Patient-Id': PATIENT_ID,
+      'Content-Type': 'application/json'
+    }
+
+});
+  check(res, {
+    'Form submitted': (r) => r.status === 200,
+    'Submit time < 3s': (r) => r.timings.duration < 3000,
+  });
+}
