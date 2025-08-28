@@ -1,4 +1,4 @@
-# QA Demo: Cypress + Playwright (SauceDemo)
+# QA : Cypress + Playwright 
 
 This repository demonstrates parallel E2E setups for the same web app using **Cypress** and **Playwright**, modeled against the public **Sauce Demo** site.
 
