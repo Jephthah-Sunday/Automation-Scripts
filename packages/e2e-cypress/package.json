@@ -1,0 +1,16 @@
+{
+  "name": "e2e-cypress",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "cypress run",
+    "open": "cypress open"
+  },
+  "devDependencies": {
+    "cypress": "^13.13.0",
+    "cypress-mochawesome-reporter": "^3.8.2",
+    "@types/node": "^22.5.4",
+    "typescript": "^5.5.4",
+    "dotenv": "^16.4.5"
+  }
+}

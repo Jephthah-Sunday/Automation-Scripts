@@ -1,0 +1,16 @@
+{
+  "name": "e2e-playwright",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "playwright test",
+    "open": "playwright test --ui",
+    "install-browsers": "playwright install --with-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.2",
+    "dotenv": "^16.4.5",
+    "@types/node": "^22.5.4",
+    "typescript": "^5.5.4"
+  }
+}

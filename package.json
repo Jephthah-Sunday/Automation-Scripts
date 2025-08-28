@@ -1,0 +1,32 @@
+{
+  "name": "qa-demo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "npm run test:all",
+    "test:all": "npm run -w e2e-cypress test && npm run -w e2e-playwright test",
+    "test:cypress": "npm run -w e2e-cypress test",
+    "test:playwright": "npm run -w e2e-playwright test"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "eslint": "^9.9.0",
+    "prettier": "^3.3.3"
+  },
+  "version": "1.0.0",
+  "description": "This repository demonstrates parallel E2E setups for the same web app using **Cypress** and **Playwright**, modeled against the public **Sauce Demo** site.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jephthah-Sunday/Automation-Scripts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jephthah-Sunday/Automation-Scripts/issues"
+  },
+  "homepage": "https://github.com/Jephthah-Sunday/Automation-Scripts#readme"
+}
